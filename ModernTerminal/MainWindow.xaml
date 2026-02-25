@@ -1,0 +1,30 @@
+<Window x:Class="ModernTerminal.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:winuiex="using:WinUIEx" 
+        xmlns:local="using:ModernTerminal"
+        mc:Ignorable="d"
+        Title="Modern Terminal">
+
+    <Window.SystemBackdrop>
+        <local:BlurredBackdrop/>
+    </Window.SystemBackdrop>
+
+    <Grid x:Name="RootGrid" Background="Transparent">
+        <!-- Draggable title bar -->
+        <Grid x:Name="AppTitleBar"
+              Height="40"
+              VerticalAlignment="Top"
+              Background="Transparent" />
+
+        <!-- Single unified scrollable pane (everything inside) -->
+        <ScrollViewer x:Name="TerminalScroll"
+                      Padding="32,28,32,28"
+                      VerticalScrollBarVisibility="Auto"
+                      Background="Transparent">
+            <StackPanel x:Name="TerminalOutput" Spacing="4"/>
+        </ScrollViewer>
+    </Grid>
+</Window>

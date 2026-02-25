@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ModernTerminal (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ModernTerminal (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
