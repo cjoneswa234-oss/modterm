@@ -382,9 +382,4 @@ namespace ModernTerminal
             }
         }
     }
-
-    // =======================================================================
-    // YOUR ConPTYTerminal CLASS (from ConPTYTerminal.cs) — unchanged
-    // =======================================================================
-    // (paste your full ConPTYTerminal class here)
 }
