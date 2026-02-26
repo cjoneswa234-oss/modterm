@@ -259,7 +259,8 @@ namespace ModernTerminal
 
             var tintSub = new MenuFlyoutSubItem { Text = "Tint" };
             var tintOptions = new (string, Color)[] {
-                ("Transparent", Colors.Transparent), ("Clear (White)", Colors.White),
+                ("Transparent", Colors.Transparent), ("Snow White", Colors.White),
+                ("Pitch Black", Colors.Black),
                 ("Violet", Color.FromArgb(255,153,0,255)), ("Azure", Colors.Blue),
                 ("Verdant", Colors.Lime), ("Sunny", Colors.Yellow),
                 ("Citrus", Color.FromArgb(255,255,153,0)), ("Ember", Colors.Red)
