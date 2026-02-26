@@ -1,4 +1,5 @@
 using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Documents;
@@ -99,7 +100,7 @@ namespace ModernTerminal
                     int idx = _currentInputRow != null ? TerminalOutput.Children.IndexOf(_currentInputRow) : TerminalOutput.Children.Count;
                     TerminalOutput.Children.Insert(idx, tb);
                 }
-                TerminalScroll.ChangeView(null, TerminalScroll.ExtentHeight, null);
+                ScrollToBottom();
             });
         }
 
@@ -167,8 +168,19 @@ namespace ModernTerminal
             _currentInputRow.Children.Add(_currentInputBox);
 
             TerminalOutput.Children.Add(_currentInputRow);
-            TerminalScroll.ChangeView(null, TerminalScroll.ExtentHeight, null);
+            ScrollToBottom();
             _currentInputBox.Focus(FocusState.Programmatic);
+        }
+
+        /// <summary>
+        /// Scrolls the terminal to the bottom after layout has updated, so the new input line and output stay in view.
+        /// </summary>
+        private void ScrollToBottom()
+        {
+            DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
+            {
+                TerminalScroll.ChangeView(null, TerminalScroll.ExtentHeight, null);
+            });
         }
 
         private void InputBox_KeyDown(object sender, KeyRoutedEventArgs e)
