@@ -179,6 +179,7 @@ namespace ModernTerminal
         {
             DispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
             {
+                System.Threading.Thread.Sleep(50); // slight delay to ensure layout is updated before scrolling
                 TerminalScroll.ChangeView(null, TerminalScroll.ExtentHeight, null);
             });
         }
