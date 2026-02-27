@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ModernTerminal
+namespace modterm
 {
     // =======================================================================
     // YOUR IMPROVED ConPTYTerminal (copy-paste exactly what you sent me)

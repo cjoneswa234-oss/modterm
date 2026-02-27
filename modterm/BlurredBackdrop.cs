@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WinUIEx;
 
-namespace ModernTerminal
+namespace modterm
 {
     public partial class BlurredBackdrop : CompositionBrushBackdrop
     {
