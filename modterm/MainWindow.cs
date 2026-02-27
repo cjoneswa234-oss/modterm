@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Windows.System;
 using Windows.UI;
@@ -15,21 +16,19 @@ namespace modterm
 {
     public sealed partial class MainWindow : Window
     {
-        private FontFamily _currentFont = new FontFamily("Cascadia Mono");
-        private double _currentFontSize = 15.5;
-        private SolidColorBrush _inputBrush = new SolidColorBrush(Color.FromArgb(255, 0, 238, 255));
-        private SolidColorBrush _outputBrush = new SolidColorBrush(Color.FromArgb(255, 80, 255, 140));
-        private string _commandLine = "";
-        private Color _outputColor = Color.FromArgb(255, 80, 255, 140);
-        private Color _inputColor = Color.FromArgb(255, 0, 238, 255);
+        private FontFamily          _currentFont = new FontFamily("Cascadia Mono");
+        private double              _currentFontSize = 15.5;
+        private SolidColorBrush     _inputBrush = new SolidColorBrush(Color.FromArgb(255, 0, 238, 255));
+        private SolidColorBrush     _outputBrush = new SolidColorBrush(Color.FromArgb(255, 80, 255, 140));
+        private Color               _inputColor = Color.FromArgb(255, 0, 238, 255);
+        private Color               _outputColor = Color.FromArgb(255, 80, 255, 140);
+        private float               _blurAmount = 0F;
+
+        private string              _commandLine = "";
+        private List<string>        _bufferLines = new List<string>();
+
         private void TerminalCanvas_Draw(CanvasControl sender, CanvasDrawEventArgs args)
         {
-            //// You can also draw shapes
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    args.DrawingSession.DrawEllipse(200 + i * 30, 100, 10, 10, Windows.UI.Color.FromArgb(255, (byte)(50 + i * 40), (byte)(50 + i * 40), (byte)(255 - i * 40)));
-            //}
-
             if (_commandLine != null)
             {
                 // Create command list and draw command line in a blur
@@ -67,7 +66,7 @@ namespace modterm
                     var blurEffect = new GaussianBlurEffect
                     {
                         Source = commandList,
-                        BlurAmount = 5.0f
+                        BlurAmount = _blurAmount
                     };
 
                     args.DrawingSession.DrawImage(blurEffect);
@@ -205,8 +204,8 @@ namespace modterm
             {
                 byte pct = (byte)(i * 10);
                 var item = new MenuFlyoutItem { Text = i == 0 ? "Transparent (0%)" : $"{pct}%" };
-                item.Click += (_, __) => SetTransparency(pct);
-                transSub.Items.Add(item);
+                item.Click += (_, __) => { SetTransparency(pct); TerminalCanvas.Invalidate(); };
+                    transSub.Items.Add(item);
             }
             flyout.Items.Add(transSub);
 
@@ -221,7 +220,7 @@ namespace modterm
             foreach (var (label, tint) in tintOptions)
             {
                 var item = new MenuFlyoutItem { Text = label };
-                item.Click += (_, __) => SetTint(tint);
+                item.Click += (_, __) => { SetTint(tint); TerminalCanvas.Invalidate(); };
                 tintSub.Items.Add(item);
             }
             flyout.Items.Add(tintSub);
@@ -234,7 +233,7 @@ namespace modterm
             foreach (var f in fonts)
             {
                 var item = new MenuFlyoutItem { Text = f };
-                item.Click += (_, __) => { _currentFont = new FontFamily(f); };
+                item.Click += (_, __) => { _currentFont = new FontFamily(f); TerminalCanvas.Invalidate(); };
                 fontSub.Items.Add(item);
             }
             flyout.Items.Add(fontSub);
@@ -245,17 +244,28 @@ namespace modterm
             foreach (var s in sizes)
             {
                 var item = new MenuFlyoutItem { Text = $"{s} pt" };
-                item.Click += (_, __) => { _currentFontSize = s; };
+                item.Click += (_, __) => { _currentFontSize = s; TerminalCanvas.Invalidate(); };
                 sizeSub.Items.Add(item);
             }
             flyout.Items.Add(sizeSub);
+
+            // === NEW: Font Glow ===
+            var glowSub = new MenuFlyoutSubItem { Text = "Font Glow" };
+            var glowSubAmts = new[] { 0F, 1F, 2.5F, 5F, 7.5F, 10F, 15F };
+            foreach (var s in glowSubAmts)
+            {
+                var item = new MenuFlyoutItem { Text = $"{s} radius" };
+                item.Click += (_, __) => { _blurAmount = s; TerminalCanvas.Invalidate(); };
+                glowSub.Items.Add(item);
+            }
+            flyout.Items.Add(glowSub);
 
             // === NEW: Input Color ===
             var inputColorSub = new MenuFlyoutSubItem { Text = "Input Color" };
             foreach (var (name, col) in ColorOptions)
             {
                 var item = new MenuFlyoutItem { Text = name };
-                item.Click += (_, __) => { _inputColor = col; };
+                item.Click += (_, __) => { _inputColor = col; TerminalCanvas.Invalidate(); };
                 inputColorSub.Items.Add(item);
             }
             flyout.Items.Add(inputColorSub);
@@ -265,7 +275,7 @@ namespace modterm
             foreach (var (name, col) in ColorOptions)
             {
                 var item = new MenuFlyoutItem { Text = name };
-                item.Click += (_, __) => { _outputColor = col; };
+                item.Click += (_, __) => { _outputColor = col; TerminalCanvas.Invalidate(); };
                 outputColorSub.Items.Add(item);
             }
             flyout.Items.Add(outputColorSub);

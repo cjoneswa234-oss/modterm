@@ -25,8 +25,6 @@ namespace modterm
         private Color _currentTint = Colors.Transparent;
         private SolidColorBrush _backgroundBrush = new SolidColorBrush(Colors.Transparent);
         private ConPTYTerminal _terminal;
-
-        private List<string> _bufferLines = new List<string>();
              
         public MainWindow()
         {
