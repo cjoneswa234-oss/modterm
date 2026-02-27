@@ -1,19 +1,15 @@
-﻿using Microsoft.Graphics.Canvas.UI.Xaml;
+﻿using Microsoft.Graphics.Canvas;
+using Microsoft.Graphics.Canvas.Effects;
+using Microsoft.Graphics.Canvas.Text;
+using Microsoft.Graphics.Canvas.UI.Xaml;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Media;
-using Windows.UI;
-using System.Runtime.CompilerServices;
-using Microsoft.Graphics.Canvas.Text;
+using System.Diagnostics;
 using Windows.System;
+using Windows.UI;
 
 namespace modterm
 {
@@ -36,6 +32,47 @@ namespace modterm
 
             if (_commandLine != null)
             {
+                // Create command list and draw command line in a blur
+                using (var commandList = new CanvasCommandList(sender))
+                { 
+                    using (var clds = commandList.CreateDrawingSession())
+                    {
+                        // Draw the command line input at the bottom
+                        clds.DrawText("> " + _commandLine, 10, (float)(sender.ActualHeight - _currentFontSize - 20), _inputColor,
+                            new CanvasTextFormat { FontFamily = _currentFont.Source, FontSize = (float)_currentFontSize });
+
+                        // Draw the buffer lines above the command line
+                        double _y = sender.ActualHeight - _currentFontSize * 2 - 25; // Start above the command line
+                        for (int i = _bufferLines.Count - 1; i >= 0; i--)
+                        {
+                            var line = _bufferLines[i];
+
+                            var color = _outputColor;
+                            if (line != string.Empty)
+                            {
+                                if (line.StartsWith(">"))
+                                {
+                                    color = _inputColor;
+                                }
+                            }
+
+                            clds.DrawText(line, 10, (float)_y, color,
+                                new CanvasTextFormat { FontFamily = _currentFont.Source, FontSize = (float)_currentFontSize });
+                            _y -= _currentFontSize + 5; // Move up for the next line
+                            if (_y < 0) break; // Stop if we run out of space
+                        }
+                    }
+
+                    // Apply blur effect
+                    var blurEffect = new GaussianBlurEffect
+                    {
+                        Source = commandList,
+                        BlurAmount = 5.0f
+                    };
+
+                    args.DrawingSession.DrawImage(blurEffect);
+                }
+
                 // Draw the command line input at the bottom
                 args.DrawingSession.DrawText("> " + _commandLine, 10, (float)(sender.ActualHeight - _currentFontSize - 20), _inputColor,
                     new CanvasTextFormat { FontFamily = _currentFont.Source, FontSize = (float)_currentFontSize });
@@ -239,6 +276,8 @@ namespace modterm
         private readonly (string Name, Color Color)[] ColorOptions = new[]
         {
             ("White", Colors.White),
+            ("OG", Color.FromArgb(255, 0, 238, 255)),
+            ("Cyan", Colors.Cyan),
             ("Bright Violet", Color.FromArgb(255, 187, 68, 255)),
             ("Dim Violet", Color.FromArgb(255, 136, 0, 204)),
             ("Bright Azure", Color.FromArgb(255, 68, 153, 255)),
