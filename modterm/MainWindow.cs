@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using Windows.System;
 using Windows.UI;
 
@@ -198,7 +199,7 @@ namespace modterm
             flyout.Items.Add(new MenuFlyoutItem { Text = "Paste" });
             flyout.Items.Add(new MenuFlyoutSeparator());
 
-            // Transparency + Tint (unchanged from last time)
+            // window transparency
             var transSub = new MenuFlyoutSubItem { Text = "Transparency" };
             for (int i = 0; i <= 10; i++)
             {
@@ -209,6 +210,7 @@ namespace modterm
             }
             flyout.Items.Add(transSub);
 
+            // window tint
             var tintSub = new MenuFlyoutSubItem { Text = "Tint" };
             var tintOptions = new (string, Color)[] {
                 ("Transparent", Colors.Transparent), ("Snow White", Colors.White),
@@ -227,7 +229,7 @@ namespace modterm
 
             flyout.Items.Add(new MenuFlyoutSeparator());
 
-            // === NEW: Font Family ===
+            // font family
             var fontSub = new MenuFlyoutSubItem { Text = "Font Family" };
             var fonts = new[] { "Cascadia Mono", "Consolas", "Courier New", "Lucida Console", "Segoe UI Mono" };
             foreach (var f in fonts)
@@ -238,7 +240,7 @@ namespace modterm
             }
             flyout.Items.Add(fontSub);
 
-            // === NEW: Font Size ===
+            // font size
             var sizeSub = new MenuFlyoutSubItem { Text = "Font Size" };
             var sizes = new[] { 13.5, 14.5, 15.5, 16.5, 17.5 };
             foreach (var s in sizes)
@@ -249,9 +251,9 @@ namespace modterm
             }
             flyout.Items.Add(sizeSub);
 
-            // === NEW: Font Glow ===
+            // font glow
             var glowSub = new MenuFlyoutSubItem { Text = "Font Glow" };
-            var glowSubAmts = new[] { 0F, 1F, 2.5F, 5F, 7.5F, 10F, 15F };
+            var glowSubAmts = new[] { 0F, 1F, 2F, 3F, 5F, 7F, 10F, 15F };
             foreach (var s in glowSubAmts)
             {
                 var item = new MenuFlyoutItem { Text = $"{s} radius" };
@@ -260,9 +262,9 @@ namespace modterm
             }
             flyout.Items.Add(glowSub);
 
-            // === NEW: Input Color ===
+            // input color
             var inputColorSub = new MenuFlyoutSubItem { Text = "Input Color" };
-            foreach (var (name, col) in ColorOptions)
+            foreach (var (name, col) in _colorOptions)
             {
                 var item = new MenuFlyoutItem { Text = name };
                 item.Click += (_, __) => { _inputColor = col; TerminalCanvas.Invalidate(); };
@@ -270,9 +272,9 @@ namespace modterm
             }
             flyout.Items.Add(inputColorSub);
 
-            // === NEW: Output Color ===
+            // output color
             var outputColorSub = new MenuFlyoutSubItem { Text = "Output Color" };
-            foreach (var (name, col) in ColorOptions)
+            foreach (var (name, col) in _colorOptions)
             {
                 var item = new MenuFlyoutItem { Text = name };
                 item.Click += (_, __) => { _outputColor = col; TerminalCanvas.Invalidate(); };
@@ -280,10 +282,27 @@ namespace modterm
             }
             flyout.Items.Add(outputColorSub);
 
+            // shell selection
+            var shellSub = new MenuFlyoutSubItem { Text = "Shell" };
+            foreach (var (name, shell) in _shellEnv)
+            {
+                var item = new MenuFlyoutItem { Text = name };
+                item.Click += async (_, __) => 
+                { 
+                    _terminal.Dispose();
+                    await Task.Delay(1000); // Pauses for 1 second without blocking the UI thread
+                    _terminal = new ConPTYTerminal(shell, "");
+                    _terminal.OutputReceived += OnOutputReceived;
+                    _terminal.Start();
+                };
+                shellSub.Items.Add(item);
+            }
+            flyout.Items.Add(shellSub);
+
             flyout.ShowAt(TerminalCanvas, e.GetPosition(TerminalCanvas));
         }
 
-        private readonly (string Name, Color Color)[] ColorOptions = new[]
+        private readonly (string Name, Color Color)[] _colorOptions = new[] 
         {
             ("White", Colors.White),
             ("OG", Color.FromArgb(255, 0, 238, 255)),

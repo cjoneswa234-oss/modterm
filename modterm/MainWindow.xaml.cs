@@ -21,11 +21,21 @@ namespace modterm
 {
     public sealed partial class MainWindow : Window
     {
-        private byte _currentOpacity = 0;
-        private Color _currentTint = Colors.Transparent;
+        private byte            _currentOpacity = 0;
+        private Color           _currentTint = Colors.Transparent;
         private SolidColorBrush _backgroundBrush = new SolidColorBrush(Colors.Transparent);
-        private ConPTYTerminal _terminal;
-             
+        private ConPTYTerminal  _terminal;
+        
+        private Dictionary<string, string> _shellEnv = new Dictionary<string, string>()
+            {
+                { "cmd", "C:\\Windows\\System32\\cmd.exe" },
+                { "powershell", "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" },
+                { "pwsh", "C:\\Program Files\\PowerShell\\7\\pwsh.exe" },
+                { "bash", "C:\\Program Files\\Git\\usr\\bin\\bash.exe" }
+            };
+
+        private string _currentShell;
+
         public MainWindow()
         {
             this.InitializeComponent();
@@ -46,19 +56,13 @@ namespace modterm
             TerminalCanvas.Draw += this.TerminalCanvas_Draw;
             //TerminalCanvas.KeyDown += TerminalCanvas_KeyDown;
             TerminalCanvas.RightTapped += TerminalCanvas_RightTapped;
+
+            _currentShell = _shellEnv["bash"];
         }
 
         private void StartConPTY()
         {
-            Dictionary<string, string> shellEnv = new Dictionary<string, string>()
-            {
-                { "cmd.exe", "C:\\Windows\\System32\\cmd.exe" },
-                { "powershell.exe", "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" },
-                { "pwsh.exe", "C:\\Program Files\\PowerShell\\7\\pwsh.exe" },
-                { "bash.exe", "C:\\Program Files\\Git\\usr\\bin\\bash.exe" }
-            };
-
-             string appPath = shellEnv["bash.exe"];
+             string appPath = _currentShell;
             _terminal = new ConPTYTerminal(appPath, "");
             _terminal.OutputReceived += OnOutputReceived;
             _terminal.Start();
